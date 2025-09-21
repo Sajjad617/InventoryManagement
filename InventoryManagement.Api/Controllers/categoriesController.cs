@@ -20,16 +20,57 @@ namespace InventoryManagement.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> SaveCategory(categoriesVM CategoryVM)
         {
-            var data = await _category.SaveCategory(CategoryVM);
-            return Ok(data);
+            try
+            {
+                var data = await _category.SaveCategory(CategoryVM);
+
+                return Ok(new
+                {
+                    result = data,
+                    status = true,
+                    statusCode = 200
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    status = false,
+                    statusCode = 500
+                });
+            }
 
         }
         [HttpGet]
       
         public async Task<IActionResult> GetAllCategory()
         {
-            var data = await _category.GetAllCategory();
-            return Ok(data);
+            try
+            {
+                var data = await _category.GetAllCategory();
+
+                if (data == null)
+                {
+                    return NoContent();
+                }
+
+                return Ok(new
+                {
+                    result = data,
+                    status = true,
+                    statusCode = 200
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    status = false,
+                    statusCode = 500
+                });
+            }
 
         }
 
@@ -37,8 +78,36 @@ namespace InventoryManagement.Api.Controllers
         //[AllowAnonymous]
         public async Task<IActionResult> GetCategorybyId(int id)
         {
-            var data = await _category.GetCategorybyId(id);
-            return Ok(data);
+            try
+            {
+                var data = await _category.GetCategorybyId(id);
+
+                if (data == null)
+                {
+                    return NotFound(new
+                    {
+                        message = $"Category with Id {id} not found",
+                        status = false,
+                        statusCode = 404
+                    });
+                }
+
+                return Ok(new
+                {
+                    result = data,
+                    status = true,
+                    statusCode = 200
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    status = false,
+                    statusCode = 500
+                });
+            }
 
         }
 
@@ -46,16 +115,72 @@ namespace InventoryManagement.Api.Controllers
 
         public async Task<IActionResult> UpdateCategorybyId(int id, categoriesVM CategoryVM)
         {
-            var data = await _category.UpdateCategorybyId(id, CategoryVM);
-            return Ok(data);
+            try
+            {
+                var data = await _category.UpdateCategorybyId(id, CategoryVM);
+
+                if (data == null)
+                {
+                    return NotFound(new
+                    {
+                        message = $"Category with Id {id} not found",
+                        status = false,
+                        statusCode = 404
+                    });
+                }
+
+                return Ok(new
+                {
+                    result = data,
+                    status = true,
+                    statusCode = 200
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    status = false,
+                    statusCode = 500
+                });
+            }
 
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategorybyId(int id)
         {
-            var data = await _category.DeleteCategorybyId(id);
-            return Ok(data);
+            try
+            {
+                var data = await _category.DeleteCategorybyId(id);
+
+                if (data == null)
+                {
+                    return NotFound(new
+                    {
+                        message = $"Category with Id {id} not found",
+                        status = false,
+                        statusCode = 404
+                    });
+                }
+
+                return Ok(new
+                {
+                    message = $"Category with Id {id} deleted successfully",
+                    status = true,
+                    statusCode = 200
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    status = false,
+                    statusCode = 500
+                });
+            }
 
         }
 

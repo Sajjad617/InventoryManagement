@@ -156,16 +156,30 @@ namespace InventoryManagement.Repository.Services
         {
             try
             {
+
                 var product = await _context.Products.FindAsync(id);
                 if (product == null)
                     throw new Exception("Product not found");
+
+                string? imageBase64 = null;
+
+                // 🔹 Convert IFormFile to Base64 (optional if you want to store in DB)
+                if (productVM.ImageFile != null && productVM.ImageFile.Length > 0)
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        await productVM.ImageFile.CopyToAsync(ms);
+                        var fileBytes = ms.ToArray();
+                        imageBase64 = Convert.ToBase64String(fileBytes);
+                    }
+                }
 
                 product.Name = productVM.Name;
                 product.Description = productVM.Description;
                 product.Price = productVM.Price;
                 product.Stock = productVM.Stock;
                 product.CategoryId = productVM.CategoryId;
-                product.Image = productVM.Image;
+                product.Image = imageBase64;
 
                 _context.Products.Update(product);
                 await _context.SaveChangesAsync();

@@ -22,8 +22,25 @@ namespace InventoryManagement.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> SaveProduct([FromForm] ProductVM productVM)
         {
-            var data = await _product.SaveProduct(productVM);
-            return Ok(data);
+            try
+            {
+                var data = await _product.SaveProduct(productVM);
+                return Ok(new
+                {
+                    result = data,
+                    status = true,
+                    statusCode = 200
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    status = false,
+                    statusCode = 500
+                });
+            }
 
         }
         [HttpGet]
@@ -37,60 +54,163 @@ namespace InventoryManagement.Api.Controllers
             try
             {
                 var data = await _product.GetAllProduct(categoryId, minPrice, maxPrice, page, limit);
-                if(data == null)
+                if (data == null)
                 {
                     return NoContent();
                 }
+
                 return Ok(new
                 {
-                  Result = data,
-                  status=true,
-                  stausCode =200
+                    result = data,
+                    status = true,
+                    statusCode = 200
                 });
             }
             catch (Exception ex)
             {
-
                 return StatusCode(500, new
                 {
                     message = ex.Message,
                     status = false,
-                    statusCode =500
+                    statusCode = 500
                 });
             }
-          
+
 
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProductbyId(int id)
         {
-            var data = await _product.GetProductbyId(id);
-            return Ok(data);
+            try
+            {
+                var data = await _product.GetProductbyId(id);
+                if (data == null)
+                {
+                    return NotFound(new
+                    {
+                        message = $"Product with Id {id} not found",
+                        status = false,
+                        statusCode = 404
+                    });
+                }
+
+                return Ok(new
+                {
+                    result = data,
+                    status = true,
+                    statusCode = 200
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    status = false,
+                    statusCode = 500
+                });
+            }
 
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProductbyId(int id, ProductVM productVM)
+        public async Task<IActionResult> UpdateProductbyId(int id, [FromForm] ProductVM productVM)
         {
-            var data = await _product.UpdateProductbyId(id, productVM);
-            return Ok(data);
+            try
+            {
+                var data = await _product.UpdateProductbyId(id, productVM);
+                if (data == null)
+                {
+                    return NotFound(new
+                    {
+                        message = $"Product with Id {id} not found",
+                        status = false,
+                        statusCode = 404
+                    });
+                }
+
+                return Ok(new
+                {
+                    result = data,
+                    status = true,
+                    statusCode = 200
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    status = false,
+                    statusCode = 500
+                });
+            }
 
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProductbyId(int id)
         {
-            var data = await _product.DeleteProductbyId(id);
-            return Ok(data);
+            try
+            {
+                var data = await _product.DeleteProductbyId(id);
+                if (data == null)
+                {
+                    return NotFound(new
+                    {
+                        message = $"Product with Id {id} not found",
+                        status = false,
+                        statusCode = 404
+                    });
+                }
+
+                return Ok(new
+                {
+                    message = $"Product with Id {id} deleted successfully",
+                    status = true,
+                    statusCode = 200
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    status = false,
+                    statusCode = 500
+                });
+            }
 
         }
 
         [HttpGet("search")]
         public async Task<IActionResult> SearchProduct([FromQuery] string str, int page = 1, int limit = 10)
         {
-            var data = await _product.SearchProduct(str, page, limit);
-            return Ok(data);
+            try
+            {
+                var data = await _product.SearchProduct(str, page, limit);
+                if (data == null)
+                {
+                    return NoContent();
+                }
+
+                return Ok(new
+                {
+                    result = data,
+                    status = true,
+                    statusCode = 200
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    status = false,
+                    statusCode = 500
+                });
+            }
 
         }
 

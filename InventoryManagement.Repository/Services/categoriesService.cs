@@ -32,10 +32,9 @@ namespace InventoryManagement.Repository.Services
                 await _context.SaveChangesAsync();
                 return category;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                throw new Exception("Error while saving category", ex);
             }
         }
 
@@ -56,10 +55,9 @@ namespace InventoryManagement.Repository.Services
 
              return categories;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                throw new Exception("Error while fetching categories", ex);
             }
         }
 
@@ -77,7 +75,7 @@ namespace InventoryManagement.Repository.Services
             }
             catch (Exception ex)
             {
-                return new { Message = ex.Message };
+                throw new Exception("Error while fetching category", ex);
             }
         }
 
@@ -97,10 +95,9 @@ namespace InventoryManagement.Repository.Services
                 await _context.SaveChangesAsync();
                 return category;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                throw new Exception("Error while updating category", ex);
             }
         }
 
