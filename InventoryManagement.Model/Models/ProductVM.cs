@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace InventoryManagement.Model.Models;
 
@@ -11,12 +13,14 @@ public partial class ProductVM
 
     public string? Description { get; set; }
 
-    public string Price { get; set; } = null!;
+    public decimal Price { get; set; }
 
-    public string Stock { get; set; } = null!;
+    public decimal Stock { get; set; }
 
     public int CategoryId { get; set; }
 
+    [NotMapped]
+    public IFormFile? ImageFile { get; set; }
     public string? Image { get; set; }
 
     public DateTime? CreatedAt { get; set; }

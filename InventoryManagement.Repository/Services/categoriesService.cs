@@ -44,7 +44,17 @@ namespace InventoryManagement.Repository.Services
         {
             try
             {
-                return await _context.Categories.ToListAsync();
+                 var categories = await _context.Categories
+            .Select(c => new
+            {
+                c.Id,
+                c.Name,
+                c.Description,
+                ProductCount = _context.Products.Count(p => p.CategoryId == c.Id) // count products in this category
+            })
+            .ToListAsync();
+
+             return categories;
             }
             catch (Exception)
             {

@@ -1,5 +1,6 @@
 ﻿using InventoryManagement.Interface.ServiceInterface;
 using InventoryManagement.Model.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,6 +8,7 @@ namespace InventoryManagement.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class categoriesController : ControllerBase
     {
         private readonly Icategories _category;
@@ -23,6 +25,7 @@ namespace InventoryManagement.Api.Controllers
 
         }
         [HttpGet]
+      
         public async Task<IActionResult> GetAllCategory()
         {
             var data = await _category.GetAllCategory();
@@ -31,6 +34,7 @@ namespace InventoryManagement.Api.Controllers
         }
 
         [HttpGet("{id}")]
+        //[AllowAnonymous]
         public async Task<IActionResult> GetCategorybyId(int id)
         {
             var data = await _category.GetCategorybyId(id);
@@ -39,6 +43,7 @@ namespace InventoryManagement.Api.Controllers
         }
 
         [HttpPut("{id}")]
+
         public async Task<IActionResult> UpdateCategorybyId(int id, categoriesVM CategoryVM)
         {
             var data = await _category.UpdateCategorybyId(id, CategoryVM);

@@ -38,6 +38,7 @@ namespace InventoryManagement.Repository.Context
                 entity.Property(e => e.Name).HasMaxLength(200);
             });
 
+
             modelBuilder.Entity<ProductVM>(entity =>
             {
                 entity.HasKey(e => e.Id).HasName("PK__Products__3214EC075A8C95CE");
@@ -45,8 +46,8 @@ namespace InventoryManagement.Repository.Context
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
                 entity.Property(e => e.Image).HasMaxLength(500);
                 entity.Property(e => e.Name).HasMaxLength(200);
-                entity.Property(e => e.Price).HasMaxLength(20);
-                entity.Property(e => e.Stock).HasDefaultValueSql("((0))");
+                entity.Property(e => e.Price).HasColumnType("decimal(18, 2)");
+                entity.Property(e => e.Stock).HasColumnType("decimal(18, 0)");
             });
 
             modelBuilder.Entity<authVM>(entity =>

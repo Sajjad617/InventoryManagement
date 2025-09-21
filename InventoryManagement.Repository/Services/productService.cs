@@ -1,4 +1,5 @@
-﻿using InventoryManagement.Interface.ServiceInterface;
+﻿using Azure.Core;
+using InventoryManagement.Interface.ServiceInterface;
 using InventoryManagement.Model.Models;
 using InventoryManagement.Repository.Context;
 using Microsoft.EntityFrameworkCore;
@@ -23,11 +24,24 @@ namespace InventoryManagement.Repository.Services
         {
             try
             {
+                string? imageBase64 = null;
+
+                // 🔹 Convert IFormFile to Base64 (optional if you want to store in DB)
+                if (productVM.ImageFile != null && productVM.ImageFile.Length > 0)
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        await productVM.ImageFile.CopyToAsync(ms);
+                        var fileBytes = ms.ToArray();
+                        imageBase64 = Convert.ToBase64String(fileBytes);
+                    }
+                }
+
                 var existingProduct = await _context.Products
-                    .FirstOrDefaultAsync(p => p.Name == productVM.Name);
+                    .FirstOrDefaultAsync(p => p.Name == productVM.Name && p.CategoryId == productVM.CategoryId);
 
                 if (existingProduct != null)
-                    return new { Message = "Already Existed This Data Please Update Data" };
+                    return new { Message = "Already Existed. Please Update Data" };
 
                 var product = new ProductVM
                 {
@@ -36,7 +50,7 @@ namespace InventoryManagement.Repository.Services
                     Price = productVM.Price,
                     Stock = productVM.Stock,
                     CategoryId = productVM.CategoryId,
-                    Image = productVM.Image
+                    Image = imageBase64
                 };
 
                 await _context.Products.AddAsync(product);
@@ -50,23 +64,60 @@ namespace InventoryManagement.Repository.Services
             }
         }
 
-        public async Task<dynamic> GetAllProduct()
+        public async Task<dynamic> GetAllProduct(
+            int? categoryId,
+            decimal? minPrice,
+            decimal? maxPrice,
+            int page = 1,
+            int limit = 10
+            )
         {
             try
             {
-                return await _context.Products.ToListAsync();
-                //var productsWithCategory = await (from p in _context.Products
-                //                                  join c in _context.Categories
-                //                                  on p.CategoryId equals c.Id
-                //                                  select new
-                //                                  {
-                //                                      ProductId = p.Id,
-                //                                      ProductName = p.Name,
-                //                                      CategoryId = c.Id,
-                //                                      CategoryName = c.Name
-                //                                  }).ToListAsync();
+                // 🔹 Base query with JOIN (no Include)
+                var filteredQuery =
+                    from p in _context.Products
+                    join c in _context.Categories on p.CategoryId equals c.Id
+                    where (!categoryId.HasValue || p.CategoryId == categoryId.Value)
+                       && (!minPrice.HasValue || p.Price >= minPrice.Value)
+                       && (!maxPrice.HasValue || p.Price <= maxPrice.Value)
+                    orderby p.Id
+                    select new
+                    {
+                        p.Id,
+                        p.Name,
+                        p.Price,
+                        p.Stock,
+                        p.Description,
+                        Category = new
+                        {
+                            c.Id,
+                            c.Name,
+                            c.Description
+                        }
+                    };
 
-                //return productsWithCategory;
+                // 🔹 Count total items
+                var totalItems = await filteredQuery.CountAsync();
+                var totalPages = (int)Math.Ceiling(totalItems / (double)limit);
+
+                // 🔹 Apply pagination
+                var products = await (
+                    from p in filteredQuery
+                    select p
+                )
+                .Skip((page - 1) * limit)
+                .Take(limit)
+                .ToListAsync();
+
+                return new
+                {
+                    Page = page,
+                    Limit = limit,
+                    TotalItems = totalItems,
+                    TotalPages = totalPages,
+                    Data = products
+                };
             }
             catch (Exception ex)
             {
@@ -145,6 +196,57 @@ namespace InventoryManagement.Repository.Services
                 throw new Exception("Error while deleting product: " + ex.Message);
             }
         }
+        public async Task<dynamic> SearchProduct(string str, int page = 1, int limit = 10)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(str))
+                    return new { message = "Search keyword Something text is required." };
+
+                var query =
+                    from p in _context.Products
+                    join c in _context.Categories on p.CategoryId equals c.Id
+                    where p.Name.Contains(str) || p.Description.Contains(str)
+                    orderby p.Id
+                    select new
+                    {
+                        ProductId = p.Id,
+                        p.Name,
+                        p.Description,
+                        p.Price,
+                        p.Stock,
+                        Category = new
+                        {
+                            CategoryId = c.Id,
+                            c.Name,
+                            c.Description
+                        }
+                    };
+
+                // for Pagination
+                var totalItems = await query.CountAsync();
+                var totalPages = (int)Math.Ceiling(totalItems / (double)limit);
+
+                var products = await query
+                    .Skip((page - 1) * limit)
+                    .Take(limit)
+                    .ToListAsync();
+
+                return new
+                {
+                    Page = page,
+                    Limit = limit,
+                    TotalItems = totalItems,
+                    TotalPages = totalPages,
+                    Data = products
+                };
+            }
+            catch (Exception ex)
+            {
+                return new { message = "Error while searching products", error = ex.Message };
+            }
+        }
+        
 
         
 

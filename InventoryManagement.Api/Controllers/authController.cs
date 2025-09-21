@@ -10,6 +10,7 @@ namespace InventoryManagement.Api.Controllers
     public class authController : ControllerBase
     {
         private readonly Iauth _auth;
+
         public authController(Iauth auth)
         {
             _auth = auth;
